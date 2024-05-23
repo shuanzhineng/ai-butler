@@ -1,0 +1,68 @@
+[tool.aerich]
+tortoise_orm = "conf.settings.AERICH_TORTOISE_ORM_CONFIG"
+location = "./migrations"
+src_folder = "./."
+
+[tool.ruff]
+select = [
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "UP",  # pyupgrade
+]
+line-length = 120
+exclude = [".mypy_cache", ".*", "logs", "static", "migrations"]
+
+
+[tool.poetry]
+name = "AIButler"
+version = "0.1.0"
+description = ""
+authors = ["王凡 <wangfan@keanbang.com>"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "0.108.0"
+httpx = "0.27.0"
+tortoise-orm = "^0.20.0"
+aerich = "^0.7.2"
+loguru = "^0.7.2"
+pydantic-settings = "^2.1.0"
+aiomysql = "^0.2.0"
+gunicorn = "^21.2.0"
+uvicorn = "^0.24.0.post1"
+python-jose = "^3.3.0"
+passlib = "^1.7.4"
+python-multipart = "^0.0.6"
+typer = "^0.9.0"
+bcrypt = "^4.1.1"
+fastapi-pagination = "^0.12.17"
+ua-parser = "^0.18.0"
+granian = "^1.1.0"
+aiofiles = "^23.2.1"
+minio = "^7.2.5"
+asyncer = "^0.0.5"
+ai-butler-sdk = "^0.1.0"
+celery = {extras = ["redis"], version = "^5.3.6"}
+
+
+[[tool.poetry.source]]
+name = "ustc"
+url = "https://pypi.mirrors.ustc.edu.cn/simple"
+priority = "primary"
+
+
+[[tool.poetry.source]]
+name = "ali"
+url = "http://mirrors.aliyun.com/pypi/simple/"
+priority = "primary"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.5.0"
+mypy = "^1.7.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

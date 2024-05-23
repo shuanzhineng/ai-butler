@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+
+  ai_butler:
+        build:
+            context: ""
+            dockerfile: Dockerfile
+        image: ai_butler_fastapi
+        container_name: ai_butler_fastapi
+        restart: always
+        volumes:
+            - .:/srv/app
+        working_dir: /srv/app
+        ports:
+            - "9000:9000"
+        command:
+          - /bin/sh
+          - -c
+          - |
+            poetry run aerich upgrade
+            poetry run uvicorn main:app --host=0.0.0.0 --port=9000  --workers=2
+
+# poetry run granian --interface asgi main:app --host=0.0.0.0 --port=9000  --workers=2
+# granian暂时不可用, 与fastapi中间件冲突 issue: https://github.com/emmett-framework/granian/issues/216
