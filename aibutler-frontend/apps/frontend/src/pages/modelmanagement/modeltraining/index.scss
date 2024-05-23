@@ -1,0 +1,26 @@
+.table {
+    // display: flex;
+    // flex-wrap: wrap;
+    // justify-content: space-around;
+    .top {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .bottom {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.bntbas {
+    font-weight: bold;
+    font-size: 15px;
+    // margin: 30px;
+}
+
+// .menu {
+//     width: 100%;
+//     height: 100vh;
+//     background-color: #f2f3f6;
+// }

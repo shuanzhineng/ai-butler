@@ -1,0 +1,13 @@
+{
+  "entryPoints": ["packages/*"],
+  "name": "LabelU Kit",
+  "navigationLinks": {
+    "LabelU": "https://opendatalab.github.io/labelU/",
+    "OpenDataLab": "https://opendatalab.com/"
+  },
+  "entryPointStrategy": "packages",
+  "includeVersion": true
+
+  // Potentially useful for debugging
+  // "logLevel": "Verbose"
+}
