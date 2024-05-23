@@ -1,0 +1,18 @@
+version: '3'
+
+volumes:
+    local_data:
+
+services:
+    ai_butler_deploy_predict_worker:
+        build:
+            context: ""
+            dockerfile: Dockerfile
+        image: ai_butler_deploy_predict
+        container_name: ai_butler_deploy_predict_worker
+        restart: always
+        volumes:
+            - .:/srv/app
+        env_file:
+          - .envs
+        command: celery -A celery_app.app worker -c 1 -l INFO -Q deploy_predict
