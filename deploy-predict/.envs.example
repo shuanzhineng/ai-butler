@@ -1,0 +1,13 @@
+AI_BUTLER_SDK_BASE_URL=
+AI_BUTLER_SDK_TOKEN=
+CELERY_BROKER_URL=
+CELERY_WORKER_LISTEN_QUEUE=deploy_predict
+CELERY_WORKER_NAME=deploy_predict_worker-01
+CELERY_WORKER_CONCURRENCY=1
+DEPLOY_ONNX_WEIGHT_DIR=onnx_weight
+DEPLOY_ONNX_DOCKER_IMAGE_CPU=ai-butler-onnx-infer-service-cpu
+DEPLOY_ONNX_DOCKER_IMAGE_GPU=ai-butler-onnx-infer-service-gpu
+# 当前worker所在外部可访问的ip
+DEPLOY_ONNX_IP_ADDRESS=
+# 当前worker所在服务器的可用端口号, 逗号分割多个端口
+DEPLOY_ONNX_AVAILABLE_PORT=
