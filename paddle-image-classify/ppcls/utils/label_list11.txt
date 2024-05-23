@@ -1,0 +1,4 @@
+0 Normal_person
+1 Normal_others
+2 AI_person
+3 AI_others

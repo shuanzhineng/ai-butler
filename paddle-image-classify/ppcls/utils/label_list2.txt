@@ -1,0 +1,13 @@
+0 Academic_certificates
+1 Degree_certificate
+2 Driving_permit
+3 IDcard
+4 passport
+5 Taiwan_Pass
+6 Work_badge
+7 Bank_cards
+8 Driving_license
+9 Hong_Kong_and_Macau_Pass
+10 License
+11 Real_estate_title_deeds
+
