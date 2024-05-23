@@ -1,0 +1,1 @@
+ENV_FLAG = "local"
