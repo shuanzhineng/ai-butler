@@ -1,0 +1,50 @@
+.demo-logo-active {
+    height: 50px;
+    margin: 16px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    span {
+        margin-left: 10px;
+    }
+}
+
+.demo-logo-vertical-active {
+    height: 50px;
+    margin: 16px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.ant-layout-sider-trigger {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidercoll {
+    position: relative;
+    .collIcon {
+        position: absolute;
+        width: 10px;
+        height: 100px;
+        top: 20%;
+        right: -10px;
+        border-bottom-right-radius: 14px;
+        border-top-right-radius: 14px;
+        background-color: #dddbe3;
+        display: flex;
+        align-items: center;
+        font-size: 10px;
+        cursor: pointer;
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.lib.json",
+  "compilerOptions": {
+    "isolatedModules": false,
+    "sourceMap": false,
+    "esModuleInterop": false,
+    "declarationDir": "es/types",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "dist",
+    "baseUrl": "./"
+  },
+  "include": [
+    "./src"
+  ]
+}

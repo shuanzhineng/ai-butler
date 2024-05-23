@@ -1,0 +1,22 @@
+.menu {
+    .addbtn {
+        margin: 20px;
+    }
+}
+
+.colHeader {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    .line {
+        width: 6px;
+        height: 18px;
+        background-color: #0c70f2;
+        margin-right: 5px;
+    }
+}
+
+.deptTree {
+    margin-top: 20px;
+    display: flex;
+}
