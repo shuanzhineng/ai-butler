@@ -1,0 +1,9 @@
+download: https://ultralytics.com/assets/coco128.zip
+names:
+- closed
+- open
+nc: 2
+path: ../datasets/coco128
+test: images/test
+train: /data/home/lizhiyong/dataset/plateform/coco_closeye/images/train
+val: /data/home/lizhiyong/dataset/plateform/coco_closeye/images/val

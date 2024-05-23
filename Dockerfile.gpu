@@ -1,0 +1,59 @@
+FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
+
+ENV TZ=Asia/Shanghai \
+    PIP_DEFAULT_TIMEOUT=3600 \
+    PIP_INDEX_URL=https://pypi.mirrors.ustc.edu.cn/simple \
+    APP_HOME=/srv/app
+
+# 替换 apt 源并安装基础依赖项
+RUN set -ex \
+    && sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g; s/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        gcc \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        libsm6 libxext6 \
+        libxrender-dev \
+        libffi-dev \
+        libssl-dev \
+        libbz2-dev \
+        liblzma-dev \
+        build-essential \
+        wget \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 下载、编译、安装 Python 3.10，并设置为默认Python版本
+RUN set -ex \
+    #&& wget https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tgz \
+    && wget http://test-ai.shuanzhineng.com:9000/static/Python-3.10.6.tgz \
+    && tar -xvf Python-3.10.6.tgz \
+    && cd Python-3.10.6 \
+    && ./configure \
+    && make \
+    && make install \
+    && rm -rf /usr/local/src/Python-3.10.6 \
+    && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone \
+    && update-alternatives --install /usr/bin/python python /usr/local/bin/python3.10 1 \
+    && ln -s /usr/local/bin/pip3.10 /usr/local/bin/pip \
+    && ln -s /usr/local/bin/python3.10 /usr/local/bin/python 
+
+ENV PATH="/usr/local/bin:$PATH"
+
+# 将应用目录拷贝至镜像内
+COPY . ${APP_HOME}
+WORKDIR ${APP_HOME}
+
+# 安装依赖项
+RUN set -ex \
+    && pip config set global.index-url ${PIP_INDEX_URL} \
+    && pip install --upgrade pip \
+    && pip install --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r requirements-gpu.txt \
+    && pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113 \
+    && rm -rf /root/.cache/pip
+
+# 清理无用文件和缓存
+RUN set -ex \
+    && apt-get clean autoclean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.cache
