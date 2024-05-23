@@ -1,0 +1,30 @@
+version: '3'
+
+volumes:
+    local_data:
+
+services:
+    ai_butler_pytorch_object_detection_gpu_worker:
+        build:
+            context: ""
+            dockerfile: Dockerfile.gpu
+        image: ai_butler_pytorch_object_detection_gpu
+        container_name: ai_butler_pytorch_object_detection_gpu_worker
+        restart: always
+        volumes:
+            - .:/srv/app
+        env_file:
+          - .envs
+        environment:
+          - "NVIDIA_VISIBLE_DEVICES=all"
+        shm_size: "8g"
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: "nvidia"
+                  count: "all"
+                  capabilities: [ "gpu" ]
+        working_dir: /srv/app
+        # 使用solo模式, 如果使用默认的进程模式会导致daemonic processes are not allowed to have children
+        command: celery -A celery_app.app worker -P solo -l INFO -Q pytorch_object_detection_train
