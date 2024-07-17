@@ -61,7 +61,7 @@ services:
         container_name: ai_butler_fastapi
         restart: always
         volumes:
-            - aibutler-backend:/srv/app
+            - ./aibutler-backend:/srv/app
         working_dir: /srv/app
         ports:
             - "8488:8000"
@@ -82,7 +82,7 @@ services:
         volumes:
             - .:/srv/app
         env_file:
-          - paddle-image-classify/.envs
+          - ./paddle-image-classify/.envs
         environment:
           - "NVIDIA_VISIBLE_DEVICES=all"
         shm_size: "8g"
@@ -105,9 +105,9 @@ services:
         container_name: ai_butler_pytorch_object_detection_gpu_worker
         restart: always
         volumes:
-            - pytorch-object-detection:/srv/app
+            - ./pytorch-object-detection:/srv/app
         env_file:
-          - pytorch-object-detection/.envs
+          - ./pytorch-object-detection/.envs
         environment:
           - "NVIDIA_VISIBLE_DEVICES=all"
         shm_size: "8g"
@@ -130,10 +130,10 @@ services:
         container_name: ai_butler_deploy_predict_worker
         restart: always
         volumes:
-            - deploy-predict:/srv/app
+            - ./deploy-predict:/srv/app
         working_dir: /srv/app
         env_file:
-            - deploy-predict/.envs
+            - ./deploy-predict/.envs
         command: celery -A celery_app.app worker -c 1 -l INFO -Q deploy_predict
 
     aibutler_nginx:
@@ -148,5 +148,5 @@ services:
       ports:
         - "8188:80"
       volumes:
-        - aibutler-frontend/apps/frontend/:/etc/nginx/www-data/
-        - aibutler-frontend/apps/frontend/nginx/:/etc/nginx/conf.d/
+        - ./aibutler-frontend/apps/frontend/:/etc/nginx/www-data/
+        - ./aibutler-frontend/apps/frontend/nginx/:/etc/nginx/conf.d/
