@@ -1,0 +1,151 @@
+version: '3'
+
+services:
+    ai_butler_mysql:
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "1g"
+      image: mysql:8.0
+      container_name: ai_butler_mysql
+      volumes:
+        - ./mysql/data:/var/lib/mysql
+        - ./mysql/my.cnf:/etc/my.cnf
+      ports:
+        - "3406:3306"
+      env_file:
+        - .env
+      command: [
+        '--default-authentication-plugin=mysql_native_password',
+        '--character-set-server=utf8mb4', #设置数据库表的数据集
+        '--collation-server=utf8mb4_unicode_ci', #设置数据库表的数据集
+      ]
+
+    ai_butler_minio:
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "1g"
+      image: minio/minio
+      container_name: ai_butler_mysql
+      volumes:
+        - ./minio/data:/data
+      ports:
+        - "9800:9000"
+        - "9801:9001"
+      env_file:
+        - .env
+      command: server /data --console-address ":9001"
+
+    ai_butler_redis:
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "1g"
+      restart: always
+      image: redis:6.0
+      container_name: ai_butler_redis
+      command: redis-server /etc/redis/redis.conf
+      ports:
+        - "6389:6379"
+      volumes:
+        - ./redis/redis.conf:/etc/redis/redis.conf
+        - ./redis/data:/data
+
+    aibutler_backend:
+        build:
+            context: ""
+            dockerfile: aibutler-backend/Dockerfile
+        image: ai_butler_fastapi
+        container_name: ai_butler_fastapi
+        restart: always
+        volumes:
+            - aibutler-backend:/srv/app
+        working_dir: /srv/app
+        ports:
+            - "8488:8000"
+        command:
+            - /bin/sh
+            - -c
+            - |
+                poetry run aerich upgrade
+                poetry run uvicorn main:app --host=0.0.0.0 --port=8000  --workers=2
+
+    aibutler_paddle_image_classify_gpu_worker:
+        build:
+            context: ""
+            dockerfile: paddle-image-classify/Dockerfile.gpu
+        image: ai_butler_paddle_image_classify_gpu
+        container_name: ai_butler_paddle_image_classify_gpu_worker
+        restart: always
+        volumes:
+            - .:/srv/app
+        env_file:
+          - paddle-image-classify/.envs
+        environment:
+          - "NVIDIA_VISIBLE_DEVICES=all"
+        shm_size: "8g"
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: "nvidia"
+                  count: "all"
+                  capabilities: [ "gpu" ]
+        working_dir: /srv/app
+        # 使用solo模式, 如果使用默认的进程模式会导致daemonic processes are not allowed to have children
+        command: celery -A celery_app.app worker -P solo -l INFO -Q paddle_image_classify_train
+
+    aibutler_pytorch_object_detection_gpu_worker:
+        build:
+            context: ""
+            dockerfile: pytorch-object-detection/Dockerfile.gpu
+        image: ai_butler_pytorch_object_detection_gpu
+        container_name: ai_butler_pytorch_object_detection_gpu_worker
+        restart: always
+        volumes:
+            - pytorch-object-detection:/srv/app
+        env_file:
+          - pytorch-object-detection/.envs
+        environment:
+          - "NVIDIA_VISIBLE_DEVICES=all"
+        shm_size: "8g"
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: "nvidia"
+                  count: "all"
+                  capabilities: [ "gpu" ]
+        working_dir: /srv/app
+        # 使用solo模式, 如果使用默认的进程模式会导致daemonic processes are not allowed to have children
+        command: celery -A celery_app.app worker -P solo -l INFO -Q pytorch_object_detection_train
+
+    aibutler_deploy_predict_worker:
+        build:
+            context: ""
+            dockerfile: deploy-predict/Dockerfile
+        image: ai_butler_deploy_predict
+        container_name: ai_butler_deploy_predict_worker
+        restart: always
+        volumes:
+            - deploy-predict:/srv/app
+        working_dir: /srv/app
+        env_file:
+            - deploy-predict/.envs
+        command: celery -A celery_app.app worker -c 1 -l INFO -Q deploy_predict
+
+    aibutler_nginx:
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "1g"
+      restart: always
+      image: nginx
+      container_name: aibutler_nginx
+      command: nginx -c /etc/nginx/nginx.conf
+      ports:
+        - "8188:80"
+      volumes:
+        - aibutler-frontend/apps/frontend/:/etc/nginx/www-data/
+        - aibutler-frontend/apps/frontend/nginx/:/etc/nginx/conf.d/
