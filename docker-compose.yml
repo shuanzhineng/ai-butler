@@ -80,7 +80,7 @@ services:
         container_name: ai_butler_paddle_image_classify_gpu_worker
         restart: always
         volumes:
-            - .:/srv/app
+            - ./paddle-image-classify:/srv/app
         env_file:
           - ./paddle-image-classify/.envs
         environment:
