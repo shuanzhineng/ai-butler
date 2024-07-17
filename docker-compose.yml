@@ -55,8 +55,8 @@ services:
 
     aibutler_backend:
         build:
-            context: ""
-            dockerfile: aibutler-backend/Dockerfile
+            context: "./aibutler-backend"
+            dockerfile: Dockerfile
         image: ai_butler_fastapi
         container_name: ai_butler_fastapi
         restart: always
@@ -74,8 +74,8 @@ services:
 
     aibutler_paddle_image_classify_gpu_worker:
         build:
-            context: ""
-            dockerfile: paddle-image-classify/Dockerfile.gpu
+            context: "./paddle-image-classify"
+            dockerfile: Dockerfile.gpu
         image: ai_butler_paddle_image_classify_gpu
         container_name: ai_butler_paddle_image_classify_gpu_worker
         restart: always
@@ -99,8 +99,8 @@ services:
 
     aibutler_pytorch_object_detection_gpu_worker:
         build:
-            context: ""
-            dockerfile: pytorch-object-detection/Dockerfile.gpu
+            context: "./pytorch-object-detection"
+            dockerfile: Dockerfile.gpu
         image: ai_butler_pytorch_object_detection_gpu
         container_name: ai_butler_pytorch_object_detection_gpu_worker
         restart: always
@@ -124,8 +124,8 @@ services:
 
     aibutler_deploy_predict_worker:
         build:
-            context: ""
-            dockerfile: deploy-predict/Dockerfile
+            context: "./deploy-predict"
+            dockerfile: Dockerfile
         image: ai_butler_deploy_predict
         container_name: ai_butler_deploy_predict_worker
         restart: always
