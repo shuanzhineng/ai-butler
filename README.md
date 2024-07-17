@@ -33,7 +33,25 @@
 
 ## GPU服务器单机部署
 
+拉取项目代码进入项目目录
+
 ### 1. 修改配置文件
+
+修改中间件环境变量
+```chatinput
+cp .env.example .env
+# 修改.env文件中的mysql密码和minio账号密码
+vi .env
+```
+修改aibutler-backend环境标识以及配置文件
+```chatinput
+# 修改标识为dev或prod
+vi aibutler-backend/environment.py 
+# 环境标识为dev时，使用.dev;环境标识为prod时, 使用.prod
+cp .dev.example .dev
+# 修改配置文件
+```
+
 
 ### 2. 编译前端
 
