@@ -1,4 +1,4 @@
-AI_BUTLER_SDK_BASE_URL=后端服务地址
+AI_BUTLER_SDK_BASE_URL=http://aibutler_backend:8000
 AI_BUTLER_SDK_TOKEN=7f992706-57fc-4d73-adae-1d0dfec0f172
 CELERY_BROKER_URL=redis://:_2Ni^tag1J@aibutler_redis:6379/3
 CELERY_WORKER_LISTEN_QUEUE=deploy_predict
@@ -11,3 +11,4 @@ DEPLOY_ONNX_DOCKER_IMAGE_GPU=ai-butler-onnx-infer-service-gpu
 DEPLOY_ONNX_IP_ADDRESS=如需外部访问填写公网ip, 仅内部访问填写内网ip
 # 当前worker所在服务器的可用端口号, 逗号分割多个端口
 DEPLOY_ONNX_AVAILABLE_PORT=20000,20001,20002,20003,20004
+DEPLOY_HOST_DIR=/srv/app/infer_models

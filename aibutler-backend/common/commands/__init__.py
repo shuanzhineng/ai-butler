@@ -13,7 +13,7 @@ async def init_tortoise():
 
 async def create_user(username: str, password: str) -> None:
     await init_tortoise()
-    await User.create_user(username=username, password=password)
+    await User.create_user(username=username, password=password, is_superuser=True)
     logger.info("User added!")
 
 

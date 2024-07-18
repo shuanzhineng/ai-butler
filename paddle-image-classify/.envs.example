@@ -1,4 +1,4 @@
-AI_BUTLER_SDK_BASE_URL=后端服务地址
+AI_BUTLER_SDK_BASE_URL=http://aibutler_backend:8000
 AI_BUTLER_SDK_TOKEN=7f992706-57fc-4d73-adae-1d0dfec0f172
 CELERY_BROKER_URL=redis://:_2Ni^tag1J@aibutler_redis:6379/3
 CELERY_WORKER_LISTEN_QUEUE=paddle_image_classify_train

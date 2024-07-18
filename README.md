@@ -33,28 +33,66 @@
 
 ## GPU服务器单机部署
 
-拉取项目代码进入项目目录
+部署需要安装docker和docker-compose环境并拉取该仓库代码
 
 ### 1. 修改配置文件
 
-修改中间件环境变量
+进入后端项目目录，修改后端配置文件
 ```chatinput
-cp .env.example .env
-# 修改.env文件中的mysql密码和minio账号密码
-vi .env
-```
-修改aibutler-backend环境标识以及配置文件
-```chatinput
-# 修改标识为dev或prod
-vi aibutler-backend/environment.py 
-# 环境标识为dev时，使用.dev;环境标识为prod时, 使用.prod
-cp .dev.example .dev
-# 修改配置文件
+cd aibutler-backend
+vi envionment.py  # 将ENV_FLAG修改为 local, dev或prod
+# 复制示例配置文件
+cp .envs/.dev.example .envs/.dev
+# 修改配置型
+vi .envs/.dev  # MINIO_SERVER_HOST修改为当前部署服务的服务器IP
 ```
 
+进入应用部署服务目录, 修改配置文件
+```chatinput
+cd deploy-predict
+# 复制示例配置文件
+cp .envs.example .envs # 无需对配置文件进行修改
+```
 
-### 2. 编译前端
+进入paddle图像分类服务目录, 修改配置文件
+```chatinput
+cd paddle-image-classify
+# 复制示例配置文件
+cp .envs.example .envs # 无需对配置文件进行修改
+```
+
+进入pytorch物体检测服务目录, 修改配置文件
+```chatinput
+cd paddle-image-classify
+# 复制示例配置文件
+cp .envs.example .envs # 无需对配置文件进行修改
+```
+
+### 2. 下载前端包
+```chatinput
+cd aibutler-frontend/apps/frontend
+wget https://gitee.com/shuanzhineng/aibutler-frontend/releases/download/v1.0.0/dist.zip
+unzip dist.zip
+```
 
 ### 3. 构建镜像
+```chatinput
+docker-compose build
+```
 
 ### 4. 启动项目
+
+```chatinput
+docker-compose up -d
+```
+
+### 5. 初始化项目
+
+```
+# 进入后端容器
+docker exec -it ai_butler_fastapi /bin/bash
+# 初始化菜单
+poetry run python manage.py init-menu
+# 创建超管账号
+poetry run python manage.py create-superuser admin  # 根据提示输入密码
+```
