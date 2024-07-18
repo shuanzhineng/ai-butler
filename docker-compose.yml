@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-    ai_butler_mysql:
+    aibutler_mysql:
       logging:
         driver: "json-file"
         options:
@@ -22,7 +22,7 @@ services:
         '--collation-server=utf8mb4_unicode_ci', #设置数据库表的数据集
       ]
 
-    ai_butler_minio:
+    aibutler_minio:
       logging:
         driver: "json-file"
         options:
@@ -38,7 +38,7 @@ services:
         - .env
       command: server /data --console-address ":9001"
 
-    ai_butler_redis:
+    aibutler_redis:
       logging:
         driver: "json-file"
         options:
