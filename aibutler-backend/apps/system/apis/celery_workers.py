@@ -18,7 +18,7 @@ async def online(items: request.CeleryWorkerOnlineIn):
     """上报worker上线"""
     worker_obj = await CeleryWorker.filter(name=items.name).first()
     if worker_obj:
-        for k, v in items.model_dump():
+        for k, v in items.model_dump().items():
             setattr(worker_obj, k, v)
         await worker_obj.save()
     await CeleryWorker.create(**items.model_dump())
