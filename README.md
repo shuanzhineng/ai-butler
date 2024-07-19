@@ -1,98 +1,90 @@
-# 数安智能AI生产管理平台
+# 数安智能AI生产管理平台 
 
-数安智能是一家专注提供AI解决方案的科技公司,平台面向人工智能研究中的数据处理、算法开发、模型训练、算力管理和推理应用等各个流程的技术难点，研发了包括一站式算法开发平台、高性能分布式深度学习框架、先进算法模型库、视觉模型炼知平台、数据可视化分析平台等一系列平台及工具，在模型高效分布式训练、数据处理和可视分析、模型炼知和轻量化等技术上形成独特优势，目前已在产学研等各领域近千家单位及个人提供AI应用赋能
+🚀 **数安智能** 致力于构建下一代AI解决方案，为学术界、产业界和个人开发者提供强大的数据处理、算法研发、模型训练、算力调度和推理应用平台。我们的平台集合了一站式算法开发环境、高性能分布式学习框架、丰富的算法模型库、智能化的数据可视化分析工具和模型优化套件，致力于简化AI研发流程，加速创新步伐。 
 
-## 平台优势
+## 📈 平台优势
+- **全方位AI生态**：覆盖从数据到应用的完整AI生命周期。 
+- **灵活的算力管理**：支持CPU和GPU混合计算，优化资源利用。
+- **多框架兼容性**：兼容主流深度学习框架，如PyTorch、PaddlePaddle等。 
+- **高扩展性**：模块化设计，便于定制和集成。 
 
-![AI生产管理平台功能架构图](static/AI1.jpg)
+![AI生产管理平台功能架构](static/AI1.jpg) 
 
-## 页面预览
+## 🌐 页面预览
+![页面预览](static/img.png)
 
-![img](static/img.png)
-
-## 目录结构
-
-```text
-├── aibutler-backend            后端服务
-├── aibutler-frontend           前端服务
-├── deploy-predict              模型应用部署服务 
-├── onnx-predict                模型推理服务
-├── paddle-image-classify       基于paddlepaddle的图像分类模型训练服务
-├── pytorch-object-detection    基于pytorch的目标检测模型训练服务
+## 🗂 目录结构 
+```text 
+├── aibutler-backend # 后端API服务 
+├── aibutler-frontend # 前端UI界面 
+├── deploy-predict # 模型部署与推理服务 
+├── onnx-predict # ONNX格式模型推理 
+├── paddle-image-classify # PaddlePaddle图像分类任务 
+├── pytorch-object-detection# PyTorch目标检测任务 
 ```
 
-## 技术架构
+## 🛠️ 技术栈 
 
-![AI生产管理平台技术栈架构图](static/AI2.jpg)
+- **前端**: React.js
+- **后端**: FastAPI
+- **数据库**: MySQL 
+- **对象存储**: Minio 
+- **缓存**: Redis 
+- **部署**: Docker + Docker Compose 
 
-## 功能介绍
+![AI生产管理平台技术栈](static/AI2.jpg) 
 
-数据管理：用户可以上传训练数据集并进行管理。如果要将原始数据集用于进行模型训练，可在平台上对所上传的数据集进行如图像分类、目标检测等类型的数据标注。
-模型管理：使用标注完成的数据集进行模型训练，可在 CPU 或者 GPU 上进行多次反复迭代与参数调优训练，最终得到特定的结果模型。
-应用管理：对模型管理中指定格式的模型进行部署，支持多种深度学习框架的模型,部署后可进行在线推理。
+## 🎯 功能亮点 
+- **数据管理**: 便捷上传与处理数据集，支持数据标注及数据存储。 
+- **模型训练**: 高效训练模型，支持参数调优与迭代。 
+- **模型部署**: 快速部署模型至生产环境，实现在线推理。 
 
-## GPU服务器单机部署
+## 💻 GPU服务器单机部署指南 
 
-部署需要安装docker和docker-compose环境并拉取该仓库代码
+### 1.环境准备
+- 确保已安装Docker和Docker Compose。 
+- 克隆或下载本仓库代码。
+### 配置修改 
 
-### 1. 修改配置文件
-
-进入后端项目目录，修改后端配置文件
-```chatinput
-cd aibutler-backend
-vi envionment.py  # 将ENV_FLAG修改为 local, dev或prod
-# 复制示例配置文件
-cp .envs/.dev.example .envs/.dev
-# 修改配置型
-vi .envs/.dev  # MINIO_SERVER_HOST修改为当前部署服务的服务器IP
+#### 2.后端服务 
+```bash 
+cd aibutler-backend 
+vi envionment.py 
+# 设置ENV_FLAG为local、dev或prod 
+cp .envs/.dev.example .envs/.dev 
+vi .envs/.dev # 更新MINIO_SERVER_HOST为你服务器的IP 
 ```
-
-进入应用部署服务目录, 修改配置文件
-```chatinput
-cd deploy-predict
-# 复制示例配置文件
-cp .envs.example .envs # 无需对配置文件进行修改
-```
-
-进入paddle图像分类服务目录, 修改配置文件
-```chatinput
+#### 应用部署服务 
+```bash
+ cd deploy-predict 
+ cp .envs.example .envs 
+ ```
+#### 图像分类与物体检测服务 
+```bash
 cd paddle-image-classify
-# 复制示例配置文件
-cp .envs.example .envs # 无需对配置文件进行修改
+cp .envs.example .envs 
+cd ../pytorch-object-detection 
+cp .envs.example .envs 
 ```
 
-进入pytorch物体检测服务目录, 修改配置文件
-```chatinput
-cd paddle-image-classify
-# 复制示例配置文件
-cp .envs.example .envs # 无需对配置文件进行修改
-```
-
-### 2. 下载前端包
-```chatinput
+### 3.前端资源下载 
+```bash
 cd aibutler-frontend/apps/frontend
-wget https://gitee.com/shuanzhineng/aibutler-frontend/releases/download/v1.0.0/dist.zip
-unzip dist.zip
-```
+wget https://gitee.com/shuanzhineng/aibutler-frontend/releases/download/v1.0.0/dist.zip 
+unzip dist.zip 
+``` 
+### 4.构建与启动 `
+```bash
+docker-compose build 
+docker-compose up -d 
+``` 
 
-### 3. 构建镜像
-```chatinput
-docker-compose build
-```
+### 5.项目初始化 
 
-### 4. 启动项目
-
-```chatinput
-docker-compose up -d
-```
-
-### 5. 初始化项目
-
-```
+```bash
 # 进入后端容器
-docker exec -it ai_butler_fastapi /bin/bash
-# 初始化菜单
-poetry run python manage.py init-menu
-# 创建超管账号
-poetry run python manage.py create-superuser admin  # 根据提示输入密码
-```
+docker exec -it ai_butler_fastapi /bin/bash 
+# 初始化菜单 
+poetry run python manage.py init-menu 
+# 创建超级管理员账户 poetry run python manage.py create-superuser admin 
+``` 
