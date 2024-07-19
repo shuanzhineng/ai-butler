@@ -45,9 +45,9 @@
 - 准备一台GPU服务器。
 - 确保已安装Docker和Docker Compose。 
 - 克隆或下载本仓库代码。
-### 配置修改 
+### 2.配置修改 
 
-#### 2.后端服务 
+#### 后端服务 
 ```bash 
 cd aibutler-backend 
 vi envionment.py 
