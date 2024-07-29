@@ -64,9 +64,9 @@ services:
           - ./aibutler-backend:/srv/app
       working_dir: /srv/app
       depends_on:
-        - ai_butler_mysql
-        - ai_butler_redis
-        - ai_butler_minio
+        - aibutler_mysql
+        - aibutler_redis
+        - aibutler_minio
       ports:
           - "8488:8000"
       command:
