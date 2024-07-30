@@ -76,9 +76,10 @@ unzip dist.zip
 ``` 
 ### 4.构建与启动 `
 ```bash
+cp .envs.example .envs
 docker-compose build 
 docker-compose up -d 
-``` 
+```
 
 ### 5.项目初始化 
 
@@ -86,8 +87,9 @@ docker-compose up -d
 # 进入后端容器
 docker exec -it ai_butler_fastapi /bin/bash 
 # 初始化菜单 
-poetry run python manage.py init-menu 
-# 创建超级管理员账户 poetry run python manage.py create-superuser admin 
+poetry run python manage.py init-menus
+# 创建超级管理员账户 
+poetry run python manage.py create-superuser admin 
 ``` 
 
 ## 更新计划
