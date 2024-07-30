@@ -71,7 +71,7 @@ cp .envs.example .envs
 ### 3.前端资源下载 
 ```bash
 cd aibutler-frontend/apps/frontend
-wget https://gitee.com/shuanzhineng/aibutler-frontend/releases/download/v1.0.0/dist.zip 
+wget https://gitee.com/whentechs/aibutler-frontend/releases/download/v1.0.0/dist.zip
 unzip dist.zip 
 ``` 
 ### 4.构建与启动 `
