@@ -27,7 +27,8 @@ async def online(items: request.CeleryWorkerOnlineIn):
         for k, v in items.model_dump().items():
             setattr(worker_obj, k, v)
         await worker_obj.save()
-    await CeleryWorker.create(**items.model_dump())
+    else:
+        await CeleryWorker.create(**items.model_dump())
     return
 
 
