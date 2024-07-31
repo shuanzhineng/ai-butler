@@ -78,8 +78,8 @@ services:
         condition: service_healthy
       aibutler_redis:
         condition: service_healthy
-      aibutler_minio:
-        condition: service_healthy
+#      aibutler_minio:
+#        condition: service_healthy
     ports:
       - "8488:8000"
     command:
@@ -90,7 +90,7 @@ services:
           poetry run uvicorn main:app --host=0.0.0.0 --port=8000  --workers=2
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/system/healthcheck"]
       interval: 10s
       timeout: 5s
       retries: 5

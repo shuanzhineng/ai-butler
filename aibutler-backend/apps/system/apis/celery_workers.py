@@ -13,6 +13,12 @@ router = APIRouter(
 )
 
 
+@router.get("/healthcheck", summary="健康检查")
+async def healthcheck():
+    """服务端健康检查"""
+    return
+
+
 @router.post("/online", summary="worker上线", dependencies=[Depends(inner_authentication)])
 async def online(items: request.CeleryWorkerOnlineIn):
     """上报worker上线"""
