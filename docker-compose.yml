@@ -90,7 +90,7 @@ services:
           poetry run uvicorn main:app --host=0.0.0.0 --port=8000  --workers=2
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/system/healthcheck"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/system/celery-workers/healthcheck"]
       interval: 10s
       timeout: 5s
       retries: 5
