@@ -36,12 +36,27 @@ services:
     container_name: ai_butler_minio
     volumes:
       - ./minio/data:/data
+      - ./minio/init.sh:/init.sh
     ports:
       - "9800:9000"
       - "9801:9001"
     env_file:
       - .env
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "mc", "alias", "set", "myminio", "http://minio:9000", "minioadmin", "minioadmin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  aibutler_minio_mc:
+    image: minio/mc
+    depends_on:
+      aibutler_minio:
+        condition: service_healthy
+    volumes:
+      - ./minio/init.sh:/init.sh
+    entrypoint: ["sh", "/init.sh"]
 
   aibutler_redis:
     logging:
@@ -78,8 +93,8 @@ services:
         condition: service_healthy
       aibutler_redis:
         condition: service_healthy
-#      aibutler_minio:
-#        condition: service_healthy
+      aibutler_minio:
+        condition: service_healthy
     ports:
       - "8488:8000"
     command:
