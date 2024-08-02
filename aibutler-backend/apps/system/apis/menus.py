@@ -155,8 +155,10 @@ async def put_menu(
     items = items.model_dump()
     items["modifier"] = user
     parent_id = items.pop("parent_id")
-    parent = await query_sets.get(id=parent_id)
-    await query_sets.filter(id=instance.id).update(**items, parent=parent)
+    parent = await query_sets.filter(id=parent_id).first()
+    if parent:
+        parent = parent.id
+    await query_sets.filter(id=instance.id).update(**items, parent_id=parent)
     instance = await query_sets.get(id=pk)
     return instance
 

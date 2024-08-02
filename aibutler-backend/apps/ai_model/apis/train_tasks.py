@@ -214,7 +214,8 @@ async def put_train_task_status(task_id: int, status: TrainStatusEnum = Body(emb
 @router.get("/{group_id}/tasks", summary="训练任务列表", response_model=Page[response.TrainTaskOut])
 async def get_train_tasks(
     group_id: int,
-    status: str = "",
+    status: TrainStatusEnum | None = None,
+    keyword: str = "",
     group_query_sets=Depends(data_range_permission(TrainTaskGroup)),
     query_sets=Depends(data_range_permission(TrainTask)),
     params=Depends(Params),
@@ -223,6 +224,8 @@ async def get_train_tasks(
     query_sets = query_sets.filter(train_task_group=group).select_related("creator")
     if status:
         query_sets = query_sets.filter(status=status)
+    if keyword:
+        query_sets = query_sets.filter(description__icontains=keyword)
     output = await paginate(query_sets, params=params)
     return output
 

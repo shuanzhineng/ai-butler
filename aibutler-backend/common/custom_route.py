@@ -42,6 +42,12 @@ class CustomRoute(APIRoute):
             os_info = parsed_user_agent["os"]
             browser = ""
             os = ""
+            ip_address = request.headers.get("X-Real-IP") or ""
+            if not ip_address:
+                forwarded_for = request.headers.get("X-Forwarded-For")
+                if forwarded_for:
+                    client_ips = forwarded_for.split(",")
+                    ip_address = client_ips[0].strip()  # 通常取第一个IP为客户端IP
             if family := user_agent.get("family"):
                 major = user_agent.get("major") or ""
                 minor = user_agent.get("minor") or ""
@@ -57,7 +63,7 @@ class CustomRoute(APIRoute):
                 request_form = dict(await request.form())
                 await LoginLog.create(
                     username=request_form["username"],
-                    ip_address=request.client.host,
+                    ip_address=ip_address,
                     browser=browser,
                     os=os,
                     user_agent=raw_user_agent,
@@ -84,10 +90,11 @@ class CustomRoute(APIRoute):
                 api = request.url.path + "?" + request.url.query
             else:
                 api = request.url.path
+
             await AccessLog.create(
                 api=api,
                 method=request.method,
-                ip_address=request.client.host,
+                ip_address=ip_address,
                 browser=browser,
                 os=os,
                 user_agent=raw_user_agent,

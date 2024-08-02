@@ -3,7 +3,6 @@ from apps.system.models.db import CeleryWorker
 from common.custom_route import CustomRoute
 from common.depends import inner_authentication
 from apps.system.models import request
-from common.exceptions import CommonError
 
 router = APIRouter(
     prefix="/celery-workers",
