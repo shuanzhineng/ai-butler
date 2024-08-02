@@ -42,7 +42,7 @@
 ## 💻 GPU服务器单机部署指南 
 
 ### 1.环境准备
-- 准备一台GPU服务器。
+- 准备一台GPU服务器(参考配置: NVIDIA Tesla T4 GPU 16G显存, 8核CPU, 32G内存)。
 - 确保已安装Docker和Docker Compose。 
 - 克隆或下载本仓库代码。
 ### 2.配置修改 
@@ -90,7 +90,8 @@ docker exec -it ai_butler_fastapi /bin/bash
 poetry run python manage.py init-menus
 # 创建超级管理员账户 
 poetry run python manage.py create-superuser admin 
-``` 
+```
+
 
 ## 更新计划
 
@@ -100,6 +101,17 @@ poetry run python manage.py create-superuser admin
 - [ ] 模型训练实时日志展示(在线实时查看模型训练日志)
 - [ ] 增加统计页(展示平台数据统计情况)
 - [ ] 更多元的部署方案支持(提供Winodws系统, CPU服务器的部署方案)
+
+## 贡献人
+
+- [毛智愚](https://gitee.com/anyu5733) 
+- [李志勇](https://gitee.com/choococo)
+- [张奥博](https://gitee.com/azusa1)
+- [苏东](https://gitee.com/sudonggit)
+- [元全江](https://gitee.com/yuanquanjiang)
+- [王凡](https://gitee.com/fwwwwwwwf)
+- [李雪鹏](https://gitee.com/llxp)
+
 
 ## 问题反馈
 
