@@ -43,3 +43,10 @@ class CommonError:
         status_code = 400
         default_detail = "worker上线失败!"
         default_code = "20003"
+
+
+class LabelTaskError:
+    class ExportDataSetError(CustomException):
+        status_code = 400
+        default_detail = "数据集导出失败!"
+        default_code = "30001"

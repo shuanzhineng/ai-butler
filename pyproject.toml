@@ -46,13 +46,6 @@ asyncer = "^0.0.5"
 ai-butler-sdk = "^0.1.0"
 celery = {extras = ["redis"], version = "^5.3.6"}
 
-
-[[tool.poetry.source]]
-name = "ustc"
-url = "https://pypi.mirrors.ustc.edu.cn/simple"
-priority = "primary"
-
-
 [[tool.poetry.source]]
 name = "ali"
 url = "http://mirrors.aliyun.com/pypi/simple/"

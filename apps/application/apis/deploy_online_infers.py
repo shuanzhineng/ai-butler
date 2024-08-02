@@ -11,8 +11,9 @@ from apps.application.models import request, response
 from celery_app.tasks import deploy_onnx_infer_by_train_task
 import uuid
 from common.minio_client import minio_client
-from common.enums import AnnotationTypeEnum
+from common.enums import AnnotationTypeEnum, DeployOnlineInferStatusEnum
 from common.utils import get_instance
+from tortoise.expressions import Q
 
 router = APIRouter(
     prefix="/deploy-online-infers",
@@ -53,9 +54,18 @@ async def create_online_infers(user: NeedAuthorization, items: request.CreateDep
 
 
 @router.get("", summary="在线应用列表", response_model=Page[response.DeployOnlineInferOut])
-async def get_online_infers(query_sets=Depends(data_range_permission(DeployOnlineInfer)), params=Depends(Params)):
+async def get_online_infers(
+    keyword: str = "",
+    status: DeployOnlineInferStatusEnum | None = None,
+    query_sets=Depends(data_range_permission(DeployOnlineInfer)),
+    params=Depends(Params),
+):
     """外部通过api修改训练任务状态"""
     query_sets = query_sets.select_related("creator")
+    if keyword:
+        query_sets = query_sets.filter(Q(name__icontains=keyword) | Q(description__icontains=keyword))
+    if status:
+        query_sets = query_sets.filter(status=status)
     output = await paginate(query_sets, params=params)
     for item in output.items:
         train_task = await TrainTask.get(id=item.train_task_id)

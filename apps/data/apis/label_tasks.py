@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, UploadFile, Body
+from fastapi import APIRouter, Depends, Form, UploadFile, Body, Query
 from apps.data.models.db import LabelTask, LabelTaskAttachment, LabelTaskSample, DataSetGroup, DataSet, OssFile
 from apps.data.models import request, response
 from common.depends import NeedAuthorization, data_range_permission
@@ -7,10 +7,11 @@ from typing import Any
 from fastapi_pagination.ext.tortoise import paginate
 from common.custom_route import CustomRoute
 from common.utils import get_instance
-from common.enums import LabelTaskStatusEnum, LabelTaskSampleStateEnum
+from common.enums import LabelTaskStatusEnum, LabelTaskSampleStateEnum, AnnotationTypeEnum
 import os
+import json
 from tortoise.exceptions import DoesNotExist
-from common.exceptions import CommonError
+from common.exceptions import CommonError, LabelTaskError
 import aiofiles  # noqa
 from common.utils.labelu_export import converter
 import glob
@@ -91,6 +92,8 @@ async def patch_label_task(
 async def delete_label_task(pk: int, query_sets=Depends(data_range_permission(LabelTask))):
     """删除标注任务"""
     instance = await get_instance(query_sets, pk)
+    await LabelTaskAttachment.filter(label_task_id=pk).delete()
+    await LabelTaskSample.filter(label_task_id=pk).delete()
     await instance.delete()
     return
 
@@ -107,11 +110,10 @@ async def label_task_attachments(
     instance = await get_instance(query_sets, pk)
     attachment_obj = await LabelTaskAttachment.create(label_task=instance, creator=user)
     filename = file.filename
-    # if dir_name:
-    #     path = f"static/labelu/{instance.id}/{dir_name}/"
-    #     attachment_obj.local_file_path = f"{dir_name}/" + filename
-    # else:
     path = f"static/labelu/{instance.id}/"
+    if dir_name:
+        os.makedirs(f"{path}{dir_name}/", exist_ok=True)
+    # else:
     attachment_obj.local_file_path = filename
     os.makedirs(path, exist_ok=True)
     async with aiofiles.open(path + filename, "wb") as f:
@@ -170,16 +172,28 @@ async def create_label_sample(
     return {"ids": ids}
 
 
+class NewParams(Params):
+    page: int = Query(1, ge=1, description="Page number")
+    # 调整最大值范围
+    size: int = Query(50, ge=1, le=1000, description="Page size")
+
+
 @router.get("/{pk}/samples", summary="标注样本列表", response_model=Page[response.LabelTaskSampleOut])
 async def label_samples(
     pk: int,
-    params=Depends(Params),
+    state: LabelTaskSampleStateEnum | None = None,
+    annotated_count: int | None = None,
+    params=Depends(NewParams),
     query_sets=Depends(data_range_permission(LabelTask)),
     sample_query_sets=Depends(data_range_permission(LabelTaskSample)),
 ):
     """标注样本列表"""
     label_task = await get_instance(query_sets, pk)
     query_sets = sample_query_sets.filter(label_task=label_task)
+    if state:
+        query_sets = query_sets.filter(state=state)
+    if annotated_count:
+        query_sets = query_sets.filter(annotated_count=annotated_count)
     return await paginate(query_sets, params=params)
 
 
@@ -238,70 +252,160 @@ async def export_to_datasets(
     dataset_group_id = items["dataset_group_id"]
     dataset_group_name = items["dataset_group_name"]
     dataset_group_note = items["dataset_group_note"]
-    data = list(
-        await sample_query_sets.filter(id__in=sample_ids).values(
-            "id", "task_attachment_ids", "annotated_count", "data", "state"
+    # todo 查询标注任务, 根据标注任务配置调整导出策略(分类和画框)
+    label_task = await get_instance(LabelTask, task_id)
+    label_task_config = label_task.config
+    tool = ""
+    if label_task_config_dict := json.loads(label_task_config):
+        tool = label_task_config_dict["tools"][0]["tool"]
+    if not tool:
+        raise LabelTaskError.ExportDataSetError("数据集导出失败, 未完成标注配置!")
+    elif tool == "tagTool":  # 分类
+        if dataset_group_id:
+            group = await DataSetGroup.filter(id=dataset_group_id).first()
+            if group.annotation_type != AnnotationTypeEnum.IMAGE_CLASSIFY:
+                raise LabelTaskError.ExportDataSetError
+        else:
+            group = await DataSetGroup.create(
+                name=dataset_group_name, creator=user, annotation_type=AnnotationTypeEnum.IMAGE_CLASSIFY
+            )
+        # 根据分类标签创建对应目录
+        source_dir = f"static/classify/{task_id}"
+        options = label_task_config_dict["tools"][0]["config"]["attributes"][0]["options"]
+        for option in options:
+            os.makedirs(f"{source_dir}/{option['key']}", exist_ok=True)
+        # 将对应的图片移动到对应标签目录中
+        data = list(
+            await sample_query_sets.filter(id__in=sample_ids).values(
+                "id", "task_attachment_ids", "annotated_count", "data", "state"
+            )
         )
-    )
-    xml_result = converter.convert(input_data=data, export_type="xml")
-    label_dir = f"static/labelu/{task_id}/labels"
-    source_dir = f"static/labelu/{task_id}"
-    os.makedirs(label_dir, exist_ok=True)
-    xml_files = glob.glob(os.path.join(label_dir, "*.xml"))
-    # 删除所有xml文件, 可能为上一次标注导出的结果
-    for xml_file in xml_files:
+        for d in data:
+            if d["state"] != LabelTaskSampleStateEnum.DONE:
+                continue
+            label_info = d["data"]
+            # {
+            #     "urls": {
+            #         "480": "/static/labelu/36/images/dog.96.jpg"
+            #     },
+            #     "result": {
+            #         "tagTool": {
+            #             "result": [
+            #                 {
+            #                     "id": "USR6zJth",
+            #                     "attributes": {
+            #                         "tag-label-1": "dog"
+            #                     }
+            #                 }
+            #             ],
+            #             "toolName": "tagTool"
+            #         }
+            #     },
+            #     "fileNames": {
+            #         "480": "images/dog.96.jpg"
+            #     }
+            # }
+            label = list(label_info["result"]["tagTool"]["result"][0]["attributes"].values())[0]
+            for option in options:
+                if option["value"] == label:
+                    label = option["key"]
+
+            image_path = list(label_info["urls"].values())[0]
+            shutil.copy(image_path[1:], f"{source_dir}/{label}")
+        # 压缩上传数据集
+        output_zip = f"static/classify/label-{task_id}"
+        await asyncify(shutil.make_archive)(output_zip, "zip", root_dir=source_dir)
+
+        # 上传到minio
+        year_month = get_current_time().strftime("%Y-%m")
+        label_task = await LabelTask.get(id=task_id)
+        object_name = f"{user.username}/{year_month}/labelu/{label_task.name}-{task_id}.zip"
+        await asyncify(minio_client.fupload_file)(object_name, output_zip + ".zip")
+        file = await OssFile.create(path=object_name, filename=f"{label_task.name}-{task_id}.zip")
+        # 导入到数据集 todo 修改导入类型
+        if old_data_set := await DataSet.filter(data_set_group=group).order_by("-version").first():
+            version = old_data_set.version + 1
+        else:
+            version = 1
+        await DataSet.create(
+            version=version, data_set_group=group, creator=user, description=dataset_group_note, file=file
+        )
+        # 删除掉压缩包
         try:
-            os.remove(xml_file)
+            os.remove(output_zip + ".zip")
+            shutil.rmtree(source_dir)
         except Exception:
             pass
-    # 写入xml文件
-    for xml_str in xml_result:
-        if not xml_str:
-            continue
-        doc = ET.fromstring(xml_str)
-        folder = None
-        file_name = ""
-        doc_folder = doc.find(".//folder")
-        doc_filename = doc.find(".//filename")
-        if doc_folder is not None:
-            folder = doc_folder.text
-        if doc_filename is not None:
-            file_name = str(doc_filename.text)
-        if folder:
-            # 文件名中可能存在多个.的情况, 删除最后一段后缀
-            split_list = file_name.split(".")
-            split_list.pop(-1)
-            file_name = ".".join(split_list)
-            label_file_path = f"{label_dir}/{folder}-{file_name}.xml"
+    elif tool == "rectTool":  # 画框
+        if dataset_group_id:
+            group = await DataSetGroup.filter(id=dataset_group_id).first()
+            if group.annotation_type != AnnotationTypeEnum.OBJECT_DETECTION:
+                raise LabelTaskError.ExportDataSetError
         else:
-            split_list = file_name.split(".")
-            split_list.pop(-1)
-            file_name = ".".join(split_list)
-            label_file_path = f"{label_dir}/{file_name}.xml"
-        async with aiofiles.open(label_file_path, "w") as f:
-            await f.write(xml_str)
-    # 压缩为zip
-    output_zip = f"static/labelu/label-{task_id}"
-    await asyncify(shutil.make_archive)(output_zip, "zip", root_dir=source_dir)
-    # 上传到minio
-    year_month = get_current_time().strftime("%Y-%m")
-    label_task = await LabelTask.get(id=task_id)
-    object_name = f"{user.username}/{year_month}/labelu/{label_task.name}-{task_id}.zip"
-    await asyncify(minio_client.fupload_file)(object_name, output_zip + ".zip")
-    file = await OssFile.create(path=object_name, filename=f"{label_task.name}-{task_id}.zip")
-    # 导入到数据集
-    if dataset_group_id:
-        group = await DataSetGroup.filter(id=dataset_group_id).first()
-    else:
-        group = await DataSetGroup.create(name=dataset_group_name, creator=user)
-    if old_data_set := await DataSet.filter(data_set_group=group).order_by("-version").first():
-        version = old_data_set.version + 1
-    else:
-        version = 1
-    await DataSet.create(version=version, data_set_group=group, creator=user, description=dataset_group_note, file=file)
-    # 删除掉压缩包
-    try:
-        os.remove(output_zip + ".zip")
-    except Exception:
-        pass
+            group = await DataSetGroup.create(name=dataset_group_name, creator=user)
+        data = list(
+            await sample_query_sets.filter(id__in=sample_ids).values(
+                "id", "task_attachment_ids", "annotated_count", "data", "state"
+            )
+        )
+        xml_result = converter.convert(input_data=data, export_type="xml")
+        label_dir = f"static/labelu/{task_id}/labels"
+        source_dir = f"static/labelu/{task_id}"
+        os.makedirs(label_dir, exist_ok=True)
+        xml_files = glob.glob(os.path.join(label_dir, "*.xml"))
+        # 删除所有xml文件, 可能为上一次标注导出的结果
+        for xml_file in xml_files:
+            try:
+                os.remove(xml_file)
+            except Exception:
+                pass
+        # 写入xml文件
+        for xml_str in xml_result:
+            if not xml_str:
+                continue
+            doc = ET.fromstring(xml_str)
+            folder = None
+            file_name = ""
+            doc_folder = doc.find(".//folder")
+            doc_filename = doc.find(".//filename")
+            if doc_folder is not None:
+                folder = doc_folder.text
+            if doc_filename is not None:
+                file_name = str(doc_filename.text)
+            if folder:
+                # 文件名中可能存在多个.的情况, 删除最后一段后缀
+                split_list = file_name.split(".")
+                split_list.pop(-1)
+                file_name = ".".join(split_list)
+                label_file_path = f"{label_dir}/{folder}-{file_name}.xml"
+            else:
+                split_list = file_name.split(".")
+                split_list.pop(-1)
+                file_name = ".".join(split_list)
+                label_file_path = f"{label_dir}/{file_name}.xml"
+            async with aiofiles.open(label_file_path, "w") as f:
+                await f.write(xml_str)
+        # 压缩为zip
+
+        output_zip = f"static/labelu/label-{task_id}"
+        await asyncify(shutil.make_archive)(output_zip, "zip", root_dir=source_dir)
+        # 上传到minio
+        year_month = get_current_time().strftime("%Y-%m")
+        label_task = await LabelTask.get(id=task_id)
+        object_name = f"{user.username}/{year_month}/labelu/{label_task.name}-{task_id}.zip"
+        await asyncify(minio_client.fupload_file)(object_name, output_zip + ".zip")
+        file = await OssFile.create(path=object_name, filename=f"{label_task.name}-{task_id}.zip")
+        # 导入到数据集
+        if old_data_set := await DataSet.filter(data_set_group=group).order_by("-version").first():
+            version = old_data_set.version + 1
+        else:
+            version = 1
+        await DataSet.create(
+            version=version, data_set_group=group, creator=user, description=dataset_group_note, file=file
+        )
+        # 删除掉压缩包
+        try:
+            os.remove(output_zip + ".zip")
+        except Exception:
+            pass
     return

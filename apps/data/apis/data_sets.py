@@ -9,6 +9,7 @@ from common.minio_client import minio_client
 from common.utils import get_instance
 from asyncer import asyncify
 from common.utils import get_current_time
+from tortoise.expressions import Q
 
 
 router = APIRouter(
@@ -88,9 +89,10 @@ async def delete_data_set_group(pk: int, query_sets=Depends(data_range_permissio
     return
 
 
-@router.get("/{group_id}/data-sets", summary="创建数据集", response_model=Page[response.DataSetOut])
+@router.get("/{group_id}/data-sets", summary="数据集列表", response_model=Page[response.DataSetOut])
 async def get_data_sets(
     group_id: int,
+    keyword: str = "",
     query_sets=Depends(data_range_permission(DataSetGroup)),
     data_set_query_sets=Depends(data_range_permission(DataSet)),
     params=Depends(Params),
@@ -98,6 +100,10 @@ async def get_data_sets(
     """创建数据集"""
     group = await get_instance(query_sets, group_id)
     data_set_query_sets = data_set_query_sets.filter(data_set_group=group).prefetch_related("file")
+    if keyword:
+        data_set_query_sets = data_set_query_sets.filter(
+            Q(file__filename__icontains=keyword) | Q(description__icontains=keyword)
+        )
     output = await paginate(data_set_query_sets, params=params)
     return output
 

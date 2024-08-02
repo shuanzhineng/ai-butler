@@ -22,6 +22,7 @@ RUN set -ex \
         ffmpeg  \
         libsm6  \
         libxext6  \
+        curl \
     # 设置时区
     && ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone \
     # 清理缓存

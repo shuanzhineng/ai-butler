@@ -91,7 +91,7 @@ class DataSetGroup(DBBaseModel):
         max_length=255,
         description="数据集组名称",
     )
-    description = fields.CharField(max_length=255, description="数据集组描述")
+    description = fields.CharField(max_length=255, description="数据集组描述", default="")
     disabled = fields.BooleanField(description="是否禁用", default=False)
     data_type = fields.CharEnumField(MediaTypeEnum, max_length=255, description="数据类型", default=MediaTypeEnum.IMAGE)
     annotation_type = fields.CharEnumField(
@@ -108,7 +108,7 @@ class DataSet(DBBaseModel):
     """数据集"""
 
     version = fields.IntField(default=1, description="数据集版本")
-    description = fields.CharField(max_length=255, description="数据集描述")
+    description = fields.CharField(max_length=255, description="数据集描述", default="")
     data_set_group = fields.ForeignKeyField(
         "models.DataSetGroup",
         on_delete=OnDelete.NO_ACTION,

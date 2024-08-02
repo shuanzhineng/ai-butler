@@ -8,7 +8,7 @@ app = typer.Typer()
 
 
 @app.command()
-def add_user(
+def create_superuser(
     username: Annotated[str, typer.Argument(help="用户名")],
     password: Annotated[str, typer.Option(prompt=True, confirmation_prompt=True, hide_input=True)],  # 隐藏式密码输入
 ) -> None:

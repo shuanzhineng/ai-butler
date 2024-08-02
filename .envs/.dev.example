@@ -1,9 +1,9 @@
-DB_URL=mysql://root:xxx@127.0.0.1:3306/ai_butler?charset=utf8mb4
-MINIO_SERVER_HOST=10.1.12.11
-MINIO_SERVER_PORT=9000
-MINIO_ACCESS_KEY=xxx
-MINIO_SECRET_KEY=xxx
+DB_URL=mysql://root:KR8Nbb*e3@aibutler_mysql:3306/ai_butler?charset=utf8mb4
+MINIO_SERVER_HOST=如需外部访问填写公网ip, 仅内部访问填写内网ip
+MINIO_SERVER_PORT=9800
+MINIO_ACCESS_KEY=shuanzhineng
+MINIO_SECRET_KEY=&3EbET&2Ae
 MINIO_DEFAULT_BUCKET=aibutler
 INNER_AUTHENTICATION_TOKEN=7f992706-57fc-4d73-adae-1d0dfec0f172
 
-CELERY_BROKER_URL=redis://127.0.0.1:6379/3
+CELERY_BROKER_URL=redis://:_2Ni^tag1J@aibutler_redis:6379/3
