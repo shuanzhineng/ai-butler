@@ -42,12 +42,12 @@ services:
       - "9801:9001"
     env_file:
       - .env
-    command: [
-      'server /data --console-address ":9001"',
-      'sh /init.sh'
-    ]
-
-
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "/bin/sh", "/init.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   aibutler_redis:
     logging:
