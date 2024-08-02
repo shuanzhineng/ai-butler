@@ -42,21 +42,12 @@ services:
       - "9801:9001"
     env_file:
       - .env
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: [ "CMD", "mc", "alias", "set", "myminio", "http://minio:9000", "minioadmin", "minioadmin" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    command: [
+      'server /data --console-address ":9001"',
+      'sh /init.sh'
+    ]
 
-  aibutler_minio_mc:
-    image: minio/mc
-    depends_on:
-      aibutler_minio:
-        condition: service_healthy
-    volumes:
-      - ./minio/init.sh:/init.sh
-    entrypoint: ["sh", "/init.sh"]
+
 
   aibutler_redis:
     logging:
