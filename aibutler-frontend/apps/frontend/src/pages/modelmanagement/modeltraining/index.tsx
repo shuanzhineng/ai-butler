@@ -35,6 +35,7 @@ const Wrapper = styled(FlexLayout)`
 
 const CardsWrapper = styled(ResponsiveGrid)`
   height: 100%;
+  grid-template-columns: repeat(2, 1fr);
 `;
 
 const Header = styled(FlexLayout.Header)`

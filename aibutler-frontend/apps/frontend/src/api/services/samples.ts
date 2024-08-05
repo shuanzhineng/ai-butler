@@ -24,7 +24,7 @@ export async function createSamples(
   }[],
 ): Promise<OkRespCreateSampleResponse> {
   return await request.post(`/data/label-tasks/${taskId}/samples`, {
-    items:data
+    items: data
   });
 }
 
@@ -103,7 +103,7 @@ export async function updateSampleAnnotationResult(
 export async function outputSample(taskId: string, sampleIds: number[], activeTxt: string) {
   // TODO: 后期改成前端导出，不调用后端接口
   let res = await request.post(
-    `/v1/labelu/label-tasks/${taskId}/samples/export`,
+    `/labelu/label-tasks/${taskId}/samples/export`,
     {
       sample_ids: sampleIds,
     },
@@ -144,18 +144,7 @@ export async function outputSample(taskId: string, sampleIds: number[], activeTx
     res.headers['content-disposition'].indexOf('=') + 2,
     res.headers['content-disposition'].length - 1,
   );
-  // console.log(filename)
-  // console.log(atob(filename))
-  // console.log(decodeURIComponent(escape(window.atob(filename))))
-  // switch (activeTxt) {
-  //   case 'JSON':
-  //   case 'COCO':
-  //     filename = filename + '.json';
-  //     break;
-  //   case 'MASK':
-  //     url = window.URL.createObjectURL(data as any);
-  //     break;
-  // }
+
   a.download = decodeURIComponent(escape(window.atob(filename)))!;
   a.href = url;
   a.click();
@@ -163,23 +152,83 @@ export async function outputSample(taskId: string, sampleIds: number[], activeTx
 
 export async function outputSamples(taskId: string, activeTxt: string) {
   console.log(taskId)
-  const samplesRes = await getSamples({ task_id: taskId, page: 1, page_size: 100000 });
-  console.log(samplesRes)
-  const sampleIdArrays = samplesRes.details;
-  const sampleIds = [];
+  const samplesRes = await getSamples({ task_id: taskId, page: 1, size: 50 });
+  let sampleIdArrays = [];
+  let sampleIds = [];
 
-  for (const sample of sampleIdArrays) {
-    sampleIds.push(sample.id!);
+
+  if (samplesRes.details.pages && samplesRes.details.pages > 1) {
+    let apiary = []
+    for (let i = 1; i <= samplesRes.details.pages; i++) {
+      apiary[i] = getSamples({ task_id: taskId, page: i, size: 50 });;
+    }
+
+
+    Promise.all(apiary.map((p) => p.catch((err) => "")))
+      .then((res) => {
+        res.forEach((ele, indexs) => {
+          console.log(ele);
+
+          if (ele) {
+            ele.details.items.forEach(itemss => {
+              sampleIdArrays.push(itemss)
+            })
+          }
+
+        });
+      })
+      .catch((err) => { })
+      .finally(() => {
+        console.log("最后");
+        console.log(sampleIdArrays)
+        for (const sample of sampleIdArrays) {
+          sampleIds.push(sample.id!);
+        }
+
+        if (sampleIds.length === 0) {
+          commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
+          return;
+        }
+
+        outputSample(taskId, sampleIds, activeTxt);
+
+        return true;
+      });
+
+
+
+
+  } else {
+    sampleIdArrays = samplesRes.details.items;
+    for (const sample of sampleIdArrays) {
+      sampleIds.push(sample.id!);
+    }
+
+    if (sampleIds.length === 0) {
+      commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
+      return;
+    }
+
+    await outputSample(taskId, sampleIds, activeTxt);
+
+    return true;
+
   }
 
-  if (sampleIds.length === 0) {
-    commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
-    return;
-  }
+  //  sampleIdArrays = samplesRes.details.items;
 
-  await outputSample(taskId, sampleIds, activeTxt);
+  // for (const sample of sampleIdArrays) {
+  //   sampleIds.push(sample.id!);
+  // }
 
-  return true;
+  // if (sampleIds.length === 0) {
+  //   commonController.notificationErrorMessage({ message: '后端返回数据出现问题' }, 1);
+  //   return;
+  // }
+
+  // await outputSample(taskId, sampleIds, activeTxt);
+
+  // return true;
 }
 
 export async function deleteSamples(

@@ -392,12 +392,12 @@ const Dept: React.FC = () => {
               </Form.Item>
             </Col>
             <Col className="gutter-row" span={12}>
-              <Form.Item label="负责人" name="owner">
+              <Form.Item label="负责人" name="owner" rules={[{ required: true, message: '负责人不能为空!' }]}>
                 <Input placeholder="请输入负责人" disabled={disabledFlag} />
               </Form.Item>
             </Col>
             <Col className="gutter-row" span={12}>
-              <Form.Item label="联系电话" name="phone">
+              <Form.Item label="联系电话" name="phone" rules={[{ required: true, message: '电话不能为空!' }]}>
                 <Input placeholder="请输入联系电话" disabled={disabledFlag} />
               </Form.Item>
             </Col>
@@ -408,7 +408,7 @@ const Dept: React.FC = () => {
             </Col>
 
             <Col className="gutter-row" span={12}>
-              <Form.Item label="排序" name="sort">
+              <Form.Item label="排序" name="sort" rules={[{ required: true, message: '排序不能为空!' }]}>
                 <InputNumber min={1} disabled={disabledFlag} />
               </Form.Item>
             </Col>

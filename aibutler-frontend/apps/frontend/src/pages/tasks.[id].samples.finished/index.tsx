@@ -6,7 +6,7 @@ import { FlexLayout } from '@labelu/components-react';
 
 import ExportPortal from '@/components/ExportPortal';
 import type { TaskLoaderResult } from '@/loaders/task.loader';
-
+import ExportData from '../../components/ExportData';
 const Wrapper = styled(FlexLayout)`
   background: #fff;
   height: calc(100vh - var(--header-height));
@@ -62,11 +62,24 @@ const SamplesFinished = () => {
           <div>跳过：{taskData?.details.stats?.skipped}</div>
         </Statistic>
         <ButtonWrapper gap="1.5rem">
-          <ExportPortal taskId={taskId} mediaType={taskData?.details.media_type}>
+          {/* <ExportPortal taskId={taskId} mediaType={taskData?.details.media_type}>
             <Button type="primary" size="large">
               导出数据
             </Button>
-          </ExportPortal>
+          </ExportPortal> */}
+
+
+
+          <ExportData taskId={taskId} mediaType={taskData?.details.media_type}>
+          <Button type="primary" size="large">
+              导出数据
+            </Button>
+          </ExportData>
+
+
+
+
+
           <Button type="default" size="large" onClick={handleGoHome}>
             返回主页
           </Button>

@@ -1,6 +1,6 @@
 import { PlusOutlined, SearchOutlined, SyncOutlined, EyeOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
-import { Badge, Button, Col, Form, Input, Row, Space, Table, Card, Flex } from 'antd';
+import { Badge, Button, Col, Form, Input, Row, Space, Table, Card, Flex, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -46,6 +46,7 @@ interface QueryParamsType {
   size: string;
   keyword?: string;
   annotation_type?: string;
+  status?: string;
 }
 
 const ModelDetail: React.FC = () => {
@@ -238,6 +239,20 @@ const ModelDetail: React.FC = () => {
                 <Space wrap>
                   <Form.Item label="关建词" name="keyword">
                     <Input placeholder="请输入关键词" />
+                  </Form.Item>
+
+                  <Form.Item label="状态" name="status">
+                    <Select
+                      defaultValue=""
+                      style={{ width: 100 }}
+                      allowClear
+                      options={[
+                        { value: 'WAITING', label: '等待训练' },
+                        { value: 'TRAINING', label: '训练中' },
+                        { value: 'FAILURE', label: '已失败' },
+                        { value: 'FINISH', label: '已完成' },
+                      ]}
+                    />
                   </Form.Item>
                   {
                     searchBtnFlag ? <Form.Item label="">

@@ -29,7 +29,8 @@ import { AttributeBox, AttributeFormItem, ConfigForm, TabForm } from './style';
 add('list-attribute', FancyAttributeList);
 add('category-attribute', FancyCategoryAttribute);
 
-const globalTools = [EToolName.Tag, EToolName.Text];
+// const globalTools = [EToolName.Tag, EToolName.Text];
+const globalTools = [EToolName.Tag];
 // const graphicTools = [EToolName.Rect, EToolName.Point, EToolName.Polygon, EToolName.Line];
 const graphicTools = [EToolName.Rect];
 const videoAnnotationTools = [EVideoToolName.VideoSegmentTool, EVideoToolName.VideoFrameTool];
@@ -193,6 +194,9 @@ const FormConfig = () => {
   );
 
   const toolsMenu = useMemo(() => {
+    console.log(selectedTools)
+    console.log(TOOL_NAME)
+    console.log(globalTools)
     if (!task?.details.media_type) {
       return [];
     }
@@ -200,14 +204,16 @@ const FormConfig = () => {
     const toolOptions = toolMapping[task.details.media_type!];
 
     return [
-      // {
-      //   label: '全局',
-      //   options: _.map(globalTools, (toolName) => ({
-      //     disabled: selectedTools.includes(toolName),
-      //     value: toolName,
-      //     label: <span>{TOOL_NAME[toolName]}</span>,
-      //   })),
-      // },
+      {
+        label: '全局',
+        options: _.map(globalTools, (toolName) => (
+          {
+            disabled: selectedTools.includes(toolName),
+            value: toolName,
+            label: <span>{TOOL_NAME[toolName]}</span>,
+          }
+        )),
+      },
       {
         label: '标记',
         options: _.map(toolOptions, ({ value, label }) => ({

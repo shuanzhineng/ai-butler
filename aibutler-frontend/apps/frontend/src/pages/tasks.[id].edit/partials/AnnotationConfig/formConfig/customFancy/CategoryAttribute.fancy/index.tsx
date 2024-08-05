@@ -247,8 +247,8 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
           const targetValue = ['string', 'number', 'boolean'].includes(typeof changedValue)
             ? changedValue
             : changedValue === null
-            ? ''
-            : (changedValue as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>).target.value;
+              ? ''
+              : (changedValue as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>).target.value;
           const newValue = set(fieldPath)(targetValue)(stateValue);
 
           setValue(newValue);
@@ -261,22 +261,22 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
         const newAttribute =
           cateType === CategoryType.Enum
             ? wrapWithId({
-                key: '',
-                value: '',
-                type: cateType,
-                required: true,
-                options: [],
-              })
+              key: '',
+              value: '',
+              type: cateType,
+              required: true,
+              options: [],
+            })
             : wrapWithId({
-                key: '',
-                value: '',
-                type: cateType,
-                required: true,
-                maxLength: 1000,
-                stringType: StringType.Text,
-                defaultValue: '',
-                regexp: '',
-              });
+              key: '',
+              value: '',
+              type: cateType,
+              required: true,
+              maxLength: 1000,
+              stringType: StringType.Text,
+              defaultValue: '',
+              regexp: '',
+            });
         const newValue = [...stateValue, newAttribute];
 
         setValue(newValue);
@@ -471,7 +471,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   >
                     <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
-                  <FlexLayout>
+                  {/* <FlexLayout>
                     <Tooltip title="是否必填">
                       <Form.Item name={[...path, index, 'required']} label="">
                         <TagSwitcher
@@ -483,13 +483,13 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                         />
                       </Form.Item>
                     </Tooltip>
-                  </FlexLayout>
+                  </FlexLayout> */}
                   <div className="should-align-center">
-                    <Tooltip title={tooltipTitleMapping[itemType]}>
+                    {/* <Tooltip title={tooltipTitleMapping[itemType]}>
                       <Tag className="multiple-switcher" onClick={handleToggleMultiple(index)}>
                         {tagTitleMapping[itemType]} <SwapOutlined />
                       </Tag>
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="删除">
                       <Icon className="remove" component={DeleteIcon} onClick={handleRemoveAttribute(item)} />
                     </Tooltip>
@@ -526,7 +526,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                   >
                     <Input placeholder={`保存结果（英文）`} onChange={handleOnChange(`[${index}].value`)} />
                   </Form.Item>
-                  <FlexLayout>
+                  {/* <FlexLayout>
                     <Tooltip title="是否必填">
                       <Form.Item name={[...path, index, 'required']} label="">
                         <TagSwitcher
@@ -538,7 +538,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
                         />
                       </Form.Item>
                     </Tooltip>
-                  </FlexLayout>
+                  </FlexLayout> */}
                   <div className="should-align-center">
                     <Tag>{tagTitleMapping[itemType]}</Tag>
                     <Tooltip title="删除">
@@ -641,7 +641,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
     const treeData = useMemo(() => makeTreeData(stateValue, fullField), [fullField, makeTreeData, stateValue]);
     const buttons = (
       <FlexLayout gap=".5rem" className="buttons">
-        {showAddTag && (
+        {/* {showAddTag && (
           <Button
             className="add"
             icon={<PlusOutlined />}
@@ -651,7 +651,7 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
           >
             {addTagText}
           </Button>
-        )}
+        )} */}
         {showAddString && (
           <Button
             className="add"
@@ -668,12 +668,16 @@ export const FancyCategoryAttribute = forwardRef<FancyCategoryAttributeRef, Fanc
 
     return (
       <StyledFancyAttributeWrapper className={className} style={style}>
-        <StyledTree
-          treeData={treeData}
-          selectable={false}
-          blockNode
-          switcherIcon={<Icon className="icon" component={TreeSwitcherIcon} />}
-        />
+        {
+          treeData.length > 0 ? <StyledTree
+            treeData={treeData}
+            selectable={false}
+            blockNode
+            switcherIcon={<Icon className="icon" component={TreeSwitcherIcon} />}
+            // defaultExpandedKeys={['标签-1','标签-1-1']}
+            defaultExpandAll={true}
+          /> : ''
+        }
         {affixProps ? <Affix {...affixProps}>{buttons}</Affix> : buttons}
       </StyledFancyAttributeWrapper>
     );

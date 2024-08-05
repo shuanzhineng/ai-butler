@@ -3,9 +3,11 @@ import { useEffect } from 'react'
 import { Modal, Radio, Select, Input, Form, Progress, Button, message, Space } from 'antd';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlexLayout } from '@labelu/components-react';
-import { ConsoleSqlOutlined } from '@ant-design/icons';
+import { ConsoleSqlOutlined, ImportOutlined } from '@ant-design/icons';
 import { ExportType, MediaType } from '@/api/types';
+import { dataDetail } from '@/api/aiButler/index'
 import { outputSample, outputSamples, getdataSet, exportDataSet, getSamples } from '@/api/services/samples';
+import { jsonParse } from '@/utils';
 
 export interface ExportDataProps {
   children: React.ReactChild;
@@ -71,12 +73,7 @@ export default function ExportData({ taskId, sampleIds, mediaType, children }: E
   const [inputValue, setValue] = useState('')
   const [inputNote, setValuenote] = useState('')
   const [messageApi, contextHolder] = message.useMessage();
-  // useEffect(() => {
-  const samplesRes = getdataSet({
-    page: 1,
-    page_size: 100
-  });
-  // }, [])
+
   const decline = () => {
     setPercent((prevPercent) => {
       const newPercent = prevPercent + 1;
@@ -86,28 +83,43 @@ export default function ExportData({ taskId, sampleIds, mediaType, children }: E
       return newPercent;
     });
   };
-  useEffect(() => {
-    let optionary = []
-    samplesRes.then(Res => {
-      console.log(Res)
-      Res.details.items.forEach(item => {
-        optionary.push({
-          label: item.name,
-          value: item.id
-        })
-      })
-    })
-    setoptions(optionary)
-  }, [])
 
+  useEffect(() => {
+
+
+  }, [])
 
   const handleOpenModal = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setModalVisible(true);
+    let optionary = []
+    dataDetail(String(taskId)).then(res => {
+      // console.log(jsonParse(res.details.config.tools[0].tool))
+      let types = jsonParse(res.details.config).tools[0].tool
+      getdataSet({
+        page: 1,
+        size: 100,
+        annotation_type: types == "tagTool" ? 'IMAGE_CLASSIFY' : types == "rectTool" ? 'OBJECT_DETECTION' : ''
+      }).then(Res => {
+        console.log(Res)
+        Res.details.items.forEach(item => {
+          optionary.push({
+            label: item.name,
+            value: item.id
+          })
+        })
+        setoptions(optionary)
+        setModalVisible(true);
+      })
+    })
+    // res.details.config.tools[0].tool=="tagTool"  图像分类
+    // res.details.config.tools[0].tool=="rectTool" 物体检测
+
+
   }, []);
 
   const handleCloseModal = useCallback(() => {
+
     setModalVisible(false);
   }, []);
 
@@ -122,48 +134,113 @@ export default function ExportData({ taskId, sampleIds, mediaType, children }: E
 
 
   const handleExport = useCallback(async () => {
-    const samplesRes = await getSamples({ task_id: taskId, page: 1, page_size: 100000 });
-    const sampleIdArrays = samplesRes.details.items;
-    const sampleIds = [];
-    for (const sample of sampleIdArrays) {
-      sampleIds.push(sample.id!);
-    }
+    const samplesRes = await getSamples({ task_id: taskId, page: 1, size: 50 });
+    let sampleIdArrays = [];
+    let sampleIds = [];
+    if (samplesRes.details.pages && samplesRes.details.pages > 1) {
+      let apiary = []
+      for (let i = 1; i <= samplesRes.details.pages; i++) {
+        apiary[i] = getSamples({ task_id: taskId, page: i, size: 50 });;
+      }
+      Promise.all(apiary.map((p) => p.catch((err) => "")))
+        .then((res) => {
+          res.forEach((ele, indexs) => {
+            console.log(ele);
 
-    const params = {
-      sample_ids: sampleIds,
-      dataset_group_id: exportType == 'json' ? String(datasetid) : '',
-      dataset_group_name: inputValue,
-      dataset_group_note: inputNote,
-    }
-    const times = setInterval(() => {
-      decline()
-    }, 300)
-    progress = true
+            if (ele) {
+              ele.details.items.forEach(itemss => {
+                sampleIdArrays.push(itemss)
+              })
+            }
 
-    await exportDataSet(taskId, params).then(res => {
-      messageApi.open({
-        type: 'success',
-        content: '导入成功',
+          });
+        })
+        .catch((err) => { })
+        .finally(() => {
+          console.log("最后");
+          console.log(sampleIdArrays)
+          for (const sample of sampleIdArrays) {
+            sampleIds.push(sample.id!);
+          }
+
+          const params = {
+            sample_ids: sampleIds,
+            dataset_group_id: exportType == 'json' ? String(datasetid) : '',
+            dataset_group_name: inputValue,
+            dataset_group_note: inputNote,
+          }
+          const times = setInterval(() => {
+            decline()
+          }, 300)
+          progress = true
+
+          exportDataSet(taskId, params).then(res => {
+            messageApi.open({
+              type: 'success',
+              content: '导入成功',
+            });
+
+          }).catch(err => {
+            console.log(err)
+          })
+
+          setTimeout(() => {
+            setModalVisible(false);
+            setValue('')
+            setValuenote('')
+            clearInterval(times)
+            progress = false
+            setPercent((prevPercent) => {
+              const newPercent = 0;
+              if (newPercent > 90) {
+                return 90;
+              }
+              return newPercent;
+            });
+          });
+
+        })
+    } else {
+      sampleIdArrays = samplesRes.details.items;
+      for (const sample of sampleIdArrays) {
+        sampleIds.push(sample.id!);
+      }
+      const params = {
+        sample_ids: sampleIds,
+        dataset_group_id: exportType == 'json' ? String(datasetid) : '',
+        dataset_group_name: inputValue,
+        dataset_group_note: inputNote,
+      }
+      const times = setInterval(() => {
+        decline()
+      }, 300)
+      progress = true
+
+      await exportDataSet(taskId, params).then(res => {
+        messageApi.open({
+          type: 'success',
+          content: '导入成功',
+        });
+
+      }).catch(err => {
+        console.log(err)
+      })
+
+      setTimeout(() => {
+        setModalVisible(false);
+        setValue('')
+        setValuenote('')
+        clearInterval(times)
+        progress = false
+        setPercent((prevPercent) => {
+          const newPercent = 0;
+          if (newPercent > 90) {
+            return 90;
+          }
+          return newPercent;
+        });
       });
-
-    }).catch(err => {
-      console.log(err)
-    })
-
-    setTimeout(() => {
-      setModalVisible(false);
-      setValue('')
-      setValuenote('')
-      clearInterval(times)
-      progress = false
-      setPercent((prevPercent) => {
-        const newPercent = 0;
-        if (newPercent > 90) {
-          return 90;
-        }
-        return newPercent;
-      });
-    });
+    }
   }, [exportType, sampleIds, taskId, inputValue, inputNote, progress]);
 
   const plainChild = useMemo(() => {

@@ -25,7 +25,7 @@ import type {
 
 //获取完整菜单树
 export async function getTreeFull(): Promise<OkRespTreeFull> {
-  return await request.get(`/system/menus/full-tree`);
+  return await request.get(`/system/menus/full-tree?no_button=true`);
 }
 //创建菜单
 export async function createMenu(params: SetCreateMenu) {

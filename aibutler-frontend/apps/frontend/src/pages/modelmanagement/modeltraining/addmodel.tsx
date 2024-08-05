@@ -103,14 +103,16 @@ const menu: React.FC = () => {
   const generateTree = (treeNodes: TreeDataNode[] = [], checkedKeys: string[] = []): TreeDataNode[] =>
     treeNodes.map(({ children, ...props }) => ({
       ...props,
-      disabled: checkedKeys.includes(props.key),
+      disabled: props.data_set_count ? true : false,
       children: generateTree(children, checkedKeys),
     }));
+
   const TreeTransfer: React.FC<TreeTransferProps> = ({ dataSource, targetKeys, ...restProps }) => {
     const { token } = theme.useToken();
 
     const transferDataSource: TransferItem[] = [];
     function flatten(list: TreeDataNode[] = []) {
+      console.log(list)
       list.forEach((item) => {
         transferDataSource.push(item as TransferItem);
         flatten(item.children);
@@ -196,6 +198,7 @@ const menu: React.FC = () => {
         setFrameworkOptions(image_classify_framework)
       }
       setDetail(res.details);
+
       getDatagrouop({
         page: 1,
         size: 100,
@@ -252,6 +255,7 @@ const menu: React.FC = () => {
           })
         } else {
           setTreeData(ary)
+          console.log(ary)
         }
       })
     });

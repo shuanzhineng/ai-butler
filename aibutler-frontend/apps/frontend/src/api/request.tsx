@@ -79,15 +79,16 @@ const authorizationBearerFailed = (error: any) => {
   return Promise.reject(error);
 };
 // console.log(import.meta.env.MODE)
-let baseURL = '';
+let baseURL = process.env.VITE_BASE_URL
+console.log(process.env)
 //@ts-ignore
-switch (import.meta.env.MODE) {
-  case 'production':
-    baseURL = config.prod.baseUrl;
-    break;
-  case 'development':
-    baseURL = config.test.baseUrl;
-}
+// switch (import.meta.env.MODE) {
+//   case 'production':
+//     baseURL = config.prod.baseUrl;
+//     break;
+//   case 'development':
+//     baseURL = config.test.baseUrl;
+// }
 const requestConfig = {
   timeout: 60 * 1000,
   // baseURL: 'http://test-ai.shuanzhineng.com:8000',

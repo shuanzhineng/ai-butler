@@ -274,8 +274,17 @@ const Samples = () => {
   const [selectValue, setSelectValue] = useState([]);
 
   const handleGoAnnotation = () => {
-    searchParams.set('state', `${selectValue}`);
-    searchParams.set('annotated_count', `${inputNote}`);
+    if (selectValue != '') {
+      searchParams.set('state', `${selectValue}`);
+    } else {
+      searchParams.delete('state');
+    }
+    if (inputNote != '') {
+      searchParams.set('annotated_count', `${inputNote}`);
+    } else {
+      searchParams.delete('annotated_count');
+    }
+    // searchParams.set('annotated_count', `${inputNote}`);
     setSearchParams(searchParams);
   };
   const resetAnnotation = () => {
@@ -283,6 +292,8 @@ const Samples = () => {
     searchParams.set('annotated_count', '');
     setValuenote('')
     setSelectValue('')
+    searchParams.delete('state');
+    searchParams.delete('annotated_count');
     setSearchParams(searchParams);
   };
   console.log(searchParams)

@@ -66,7 +66,6 @@ const Statistical = () => {
   const navigate = useNavigate();
 
   const handleGoAnnotation = () => {
-    console.log(samples)
     if (!samples || samples.details.items.length === 0) {
       return;
     }

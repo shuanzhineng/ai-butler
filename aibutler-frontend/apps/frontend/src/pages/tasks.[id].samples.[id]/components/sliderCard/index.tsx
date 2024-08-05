@@ -67,15 +67,16 @@ const SliderCard = ({ type, cardInfo, index, onClick }: SliderCardProps) => {
       </AudioWrapper>
     );
   }
-  let baseURL = '';
+  let baseURL = process.env.VITE_BASE_URL;
   //@ts-ignore
-  switch (import.meta.env.MODE) {
-    case 'production':
-      baseURL = config.prod.baseUrl;
-      break;
-    case 'development':
-      baseURL = config.test.baseUrl;
-  }
+  // switch (import.meta.env.MODE) {
+  //   case 'production':
+  //     baseURL = config.prod.baseUrl;
+  //     break;
+  //   case 'development':
+  //     baseURL = config.test.baseUrl;
+  // }
+  console.log(process.env.VITE_BASE_URL)
 console.log(sampleId)
 console.log(id)
   return (

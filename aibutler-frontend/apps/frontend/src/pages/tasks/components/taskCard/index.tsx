@@ -84,7 +84,7 @@ const TaskCard = (props: any) => {
     if (!detailBtnFlag) {
       return
     }
-    navigate('/home/tasks/' + id);
+    navigate('/home/tasks/' + id+'?page=1&size=10');
   };
   const username = storage.get('username');
   const returnPag = (e: React.MouseEvent<HTMLElement>) => {
@@ -93,6 +93,7 @@ const TaskCard = (props: any) => {
   };
   const handleDeleteTask = (e: React.MouseEvent<HTMLElement>) => {
     deleteTask(id);
+    window.location.reload()
     revalidator.revalidate();
   };
   const handleGoConfig = (e: React.MouseEvent<HTMLElement>) => {

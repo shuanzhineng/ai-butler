@@ -1,7 +1,9 @@
 import {
   CloseCircleOutlined,
   PlusOutlined,
-  DesktopOutlined
+  DesktopOutlined,
+  SearchOutlined,
+  SyncOutlined
 } from '@ant-design/icons';
 import type { TableColumnsType } from 'antd';
 import {
@@ -17,7 +19,8 @@ import {
   message,
   Card,
   Badge,
-  Collapse
+  Collapse,
+  Select
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -60,20 +63,22 @@ const Dept: React.FC = () => {
   const [form] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
-
+  const [searchFrom] = Form.useForm();
   const [modalTitle, setModalTitle] = useState('新增');
   const [editId, setEditid] = useState(Number);
   const [disabledFlag, setDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [trainOptions, setOptions] = useState<any[]>([]);
   const [total, setTotal] = useState(10)
+  const [currentPage, setcurrentPage] = useState(1)
   const [queryParams, setQueryParams] = useState<QueryParamsType>({
     page: '1',
     size: '10',
   });
   const getData = async (params: any) => {
     setIsLoading(true);
-    const res = await getonlinelist(params);
+    // { ...params, ...searchFrom.getFieldsValue() }
+    const res = await getonlinelist({ ...params, ...searchFrom.getFieldsValue() });
     setOption(res.details.items);
     setTotal(res.details.total)
     setIsLoading(false);
@@ -157,28 +162,18 @@ const Dept: React.FC = () => {
     console.log('Failed:', errorInfo);
   };
 
-  const onFinishsearch = (value: any) => {
-    const params = {
-      keyword: value.keyword ? value.keyword : '',
-      name: value.name ? value.name : '',
-      disabled: value.disabled ? value.disabled : null,
-    };
-    getData(
-      Object.assign(params, {
-        page: 1,
-        size: 10,
-      }),
-    );
+  const onFinishsearch = () => {
+    // fetchData();
+    setcurrentPage(1)
+    changData(1)
   };
-  const [searchfrom] = Form.useForm();
+
+
   const resetbtn = () => {
-    searchfrom.resetFields();
-    getData(
-      Object.assign({
-        page: 1,
-        size: 10,
-      }),
-    );
+    searchFrom.resetFields();
+    // fetchData();
+    setcurrentPage(1)
+    changData(1)
   };
   const renderStatus = (text: any, record: DataType) => {
     let tag
@@ -202,50 +197,60 @@ const Dept: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
+      width: 80,
     },
     {
       title: '名称',
       dataIndex: 'name',
       key: 'name',
+      width: 150,
     }, {
       title: '部署方式',
       dataIndex: 'is_gpu',
       key: 'is_gpu',
       render: (value, record) => record.is_gpu ? 'gpu' : 'cpu',
+      width: 100,
     }, {
       title: '数据类型',
       dataIndex: 'train_task_out',
       key: 'train_task_out',
       render: (value, record) => record.train_task_out.ai_model_type.name,
+      width: 100,
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
+      width: 100,
       render: (value, record) => renderStatus(value, record),
     }, {
       title: '接口地址',
       dataIndex: 'infer_address',
       key: 'infer_address',
+      width: 400,
     }, {
       title: '访问令牌',
       dataIndex: 'token',
       key: 'token',
+      width: 400,
     },
     {
       title: '创建时间',
       dataIndex: 'create_time',
       key: 'create_time',
+      width: 200,
     }, {
       title: '备注',
       dataIndex: 'description',
       key: 'description',
+      width: 200,
     }, {
       title: '操作',
       dataIndex: 'option',
       key: 'option',
-      width: 100,
       align: 'center',
+      fixed: 'right',
+      width: 130,
       render: (x, record: DataType) => {
         return (
           <>
@@ -329,6 +334,7 @@ const Dept: React.FC = () => {
 
   const onChangePage = (val: any) => {
     changData(val)
+    setcurrentPage(val)
   }
   const changData = (val: any) => {
     setQueryParams({ ...queryParams, page: val })
@@ -558,6 +564,39 @@ const Dept: React.FC = () => {
     <div className="menu">
       <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
         <Card bordered={false}>
+          <Form layout="inline" onFinish={onFinishsearch} form={searchFrom}>
+            <Space wrap>
+              <Form.Item label="关建词" name="keyword">
+                <Input placeholder="请输入关键词" />
+              </Form.Item>
+
+              <Form.Item label="状态" name="status">
+                <Select
+                  defaultValue=""
+                  style={{ width: 100 }}
+                  allowClear
+                  options={[
+                    { value: 'WAITING', label: '等待部署' },
+                    { value: 'DEPLOYING', label: '部署中' },
+                    { value: 'FAILURE', label: '已失败' },
+                    { value: 'FINISH', label: '已完成' },
+                  ]}
+                />
+              </Form.Item>
+              <Form.Item label="">
+                <Button icon={<SearchOutlined />} type="primary" htmlType="submit">
+                  查询
+                      </Button>
+              </Form.Item>
+              <Form.Item label="">
+                <Button icon={<SyncOutlined />} onClick={resetbtn}>
+                  重置
+                      </Button>
+              </Form.Item>
+            </Space>
+          </Form>
+        </Card>
+        <Card bordered={false}>
           <div className="addbtn">
             {
               addBtnFlag ? <Button type="primary" icon={<PlusOutlined />} onClick={addBtn} size="large">
@@ -573,6 +612,7 @@ const Dept: React.FC = () => {
               showSizeChanger: false,
               onChange: onChangePage
             }}
+            scroll={{ x: 1300 }}
             size='large'
           ></Table>
         </Card>

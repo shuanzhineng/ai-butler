@@ -34,16 +34,16 @@ const RightSiderbar = () => {
   }, []);
 
   const globalTab = useMemo(() => {
-    const tagResultKeys = Object.keys(_.get(result, 'tagTool.result[0].result', {}));
+    const tagResultKeys = Object.keys(_.get(result, 'tagTool.result[0].attributes', {}));
+    // const tagResultKeys = Object.keys(_.get(result, 'tagTool.result[0].result', {}));
     const textResultKeys = result?.textTool ? result?.textTool.result : [];
     const isFinished =
-      textResultKeys &&
-      textResultKeys.length > 0 &&
-      textResultKeys.length === size(textConfig) &&
+      // textResultKeys &&
+      // textResultKeys.length > 0 &&
+      // textResultKeys.length === size(textConfig) &&
       tagResultKeys &&
       tagResultKeys.length > 0 &&
       tagResultKeys.length === size(tagConfigList);
-
     return (
       <div className="rightTab">
         <p>全局</p>
